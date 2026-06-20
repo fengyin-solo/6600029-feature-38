@@ -35,18 +35,20 @@ function initMap() {
 function drawNoFlyZones() {
   if (!zoneLayer) return;
   zoneLayer.clearLayers();
-  for (const zone of store.noFlyZones) {
+  for (const zone of store.visibleZones) {
     const color =
       zone.type === 'airport' ? '#ef4444' :
       zone.type === 'military' ? '#f97316' : '#a855f7';
+    const isSelected = store.selectedZoneId === zone.id;
     L.circle([zone.center[0], zone.center[1]], {
       radius: zone.radius,
       color,
       fillColor: color,
-      fillOpacity: 0.15,
-      weight: 2,
+      fillOpacity: isSelected ? 0.4 : 0.15,
+      weight: isSelected ? 4 : 2,
     })
       .bindPopup(`<b>${zone.name}</b><br>Type: ${zone.type}<br>Radius: ${zone.radius}m`)
+      .on('click', () => store.selectZone(zone.id))
       .addTo(zoneLayer);
   }
 }
@@ -138,6 +140,8 @@ watch(() => store.waypoints.length, () => {
 });
 
 watch(() => store.noFlyZones.length, drawNoFlyZones);
+watch(() => store.zoneFilter, drawNoFlyZones);
+watch(() => store.selectedZoneId, drawNoFlyZones);
 watch(() => store.simProgress, drawSimDrone);
 
 onMounted(() => {

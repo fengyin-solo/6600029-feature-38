@@ -3,6 +3,7 @@ import { onMounted } from 'vue';
 import MapView from './components/MapView.vue';
 import TerrainProfile from './components/TerrainProfile.vue';
 import FlightStats from './components/FlightStats.vue';
+import NoFlyZoneList from './components/NoFlyZoneList.vue';
 import { useDroneStore } from './store/drone';
 
 const store = useDroneStore();
@@ -119,6 +120,9 @@ function handlePlanRoute() {
 
         <!-- Flight stats -->
         <FlightStats />
+
+        <!-- No-fly zone list & filter -->
+        <NoFlyZoneList />
       </div>
     </div>
   </div>

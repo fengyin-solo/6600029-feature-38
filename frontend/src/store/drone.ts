@@ -21,6 +21,8 @@ export const useDroneStore = defineStore('drone', () => {
   const isSimulating = ref(false);
   const simProgress = ref(0);
   const mapCenter = ref<[number, number]>([39.9, 116.4]);
+  const zoneFilter = ref<Set<string>>(new Set());
+  const selectedZoneId = ref<string | null>(null);
 
   const droneConfig = ref<DroneConfig>({
     maxAltitude: 500,
@@ -107,6 +109,23 @@ export const useDroneStore = defineStore('drone', () => {
     if (!currentPlan.value) return '';
     return exportKML(currentPlan.value);
   }
+  function toggleZoneFilter(type: string) {
+    const next = new Set(zoneFilter.value);
+    if (next.has(type)) {
+      next.delete(type);
+    } else {
+      next.add(type);
+    }
+    zoneFilter.value = next;
+  }
+
+  function clearZoneFilter() {
+    zoneFilter.value = new Set();
+  }
+
+  function selectZone(id: string | null) {
+    selectedZoneId.value = id;
+  }
 
   // ─── Computed ─────────────────────────────────────────────────────────────
   const totalDistance = computed(() => {
@@ -122,6 +141,15 @@ export const useDroneStore = defineStore('drone', () => {
   const batteryPercent = computed(() => {
     if (!currentPlan.value) return 0;
     return currentPlan.value.batteryUsage;
+  });
+  const visibleZones = computed<NoFlyZone[]>(() => {
+    if (zoneFilter.value.size === 0) return noFlyZones.value;
+    return noFlyZones.value.filter((z) => zoneFilter.value.has(z.type));
+  });
+
+  const selectedZone = computed<NoFlyZone | null>(() => {
+    if (!selectedZoneId.value) return null;
+    return noFlyZones.value.find((z) => z.id === selectedZoneId.value) ?? null;
   });
 
   const terrainProfile = computed(() => {
@@ -156,10 +184,14 @@ export const useDroneStore = defineStore('drone', () => {
     isSimulating,
     simProgress,
     mapCenter,
+    zoneFilter,
+    selectedZoneId,
     totalDistance,
     estimatedTime,
     batteryPercent,
     terrainProfile,
+    visibleZones,
+    selectedZone,
     addWaypoint,
     removeWaypoint,
     updateWaypoint,
@@ -168,6 +200,9 @@ export const useDroneStore = defineStore('drone', () => {
     simulateFlight,
     loadMockData,
     exportPlan,
+    toggleZoneFilter,
+    clearZoneFilter,
+    selectZone,
     updatePlan,
   };
 });
